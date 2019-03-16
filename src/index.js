@@ -1,31 +1,65 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
+import { DragDropContext } from 'react-dnd';
+import { DragSource } from 'react-dnd';
+import HTML5Backend from 'react-dnd-html5-backend';
 
 import './index.css'
 
-function Item(props) {
-  return (
+
+
+const ItemTypes = {
+  NUMBER: 'number'
+};
+
+
+const numberSource = {
+  beginDrag(props) {
+    return {
+      value: props.value
+    }
+  }
+};
+
+
+function collect(connect, monitor) {
+  return {
+    connectDragSource: connect.dragSource(),
+    isDragging: monitor.isDragging()
+  }
+}
+
+function Number(props) {
+  const { isDragging, connectDragSource } = props;
+
+  return connectDragSource(
     <button className="square">
       {props.value}
     </button>
-  )
+  );
 }
+
+
+const WrappedNumber = DragSource(ItemTypes.NUMBER, numberSource, (connect, monitor) => ({
+  connectDragSource: connect.dragSource(),
+  isDragging: monitor.isDragging(),
+}))(Number)
 
 class Bin extends React.Component {
   constructor(props) {
     super(props);
   }
 
-  renderItem() {
+  renderNumber() {
     return (
-      <Item value={this.props.value}/>
+      <WrappedNumber value={this.props.value}/>
     )
   }
 
   render() {
     return (
       <div className="square">
-        {this.renderItem(this.props.value)}
+        {this.renderNumber(this.props.value)}
       </div>
     );
   }
@@ -80,10 +114,14 @@ class Game extends React.Component {
   }
 }
 
+
+const GameWrapper = DragDropContext(HTML5Backend)(Game)
+
+
 // ========================================
 
 ReactDOM.render(
-  <Game />,
+  <GameWrapper />,
   document.getElementById('root')
 );
 
