@@ -1,12 +1,89 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-import './index.css';
-import App from './App';
-import * as serviceWorker from './serviceWorker';
+import React from 'react'
+import ReactDOM from 'react-dom'
 
-ReactDOM.render(<App />, document.getElementById('root'));
+import './index.css'
 
-// If you want your app to work offline and load faster, you can change
-// unregister() to register() below. Note this comes with some pitfalls.
-// Learn more about service workers: https://bit.ly/CRA-PWA
-serviceWorker.unregister();
+function Item(props) {
+  return (
+    <button className="square">
+      {props.value}
+    </button>
+  )
+}
+
+class Bin extends React.Component {
+  constructor(props) {
+    super(props);
+  }
+
+  renderItem() {
+    return (
+      <Item value={this.props.value}/>
+    )
+  }
+
+  render() {
+    return (
+      <div className="square">
+        {this.renderItem(this.props.value)}
+      </div>
+    );
+  }
+}
+
+class Board extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      items: [1, 2, 3, 4, 5, 6, 7, 8],
+    };
+  }
+
+  renderBin(i) {
+    return (
+      <Bin 
+        value={this.state.items[i]}
+      />
+    );
+  }
+
+  create_board() {
+    let board = []
+    for (let i=0; i<this.state.items.length; i++) {
+      board.push(
+        <div>
+          {this.renderBin(i)}
+        </div>
+      )
+    }
+    return board
+  }
+
+  render() {
+    return (
+      <div>
+        {this.create_board()}
+      </div>
+    );
+  }
+}
+
+class Game extends React.Component {
+  render() {
+    return (
+      <div className="game">
+        <div className="game-board">
+          <Board />
+        </div>
+      </div>
+    );
+  }
+}
+
+// ========================================
+
+ReactDOM.render(
+  <Game />,
+  document.getElementById('root')
+);
+
