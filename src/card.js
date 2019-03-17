@@ -21,7 +21,7 @@ const numberSource = {
     const item = monitor.getItem()
     const dropResult = monitor.getDropResult()
     if (dropResult) {
-      props.onDrop(dropResult.value, props.value)
+      props.onDrop(dropResult.index, props.index)
     }
   }
 };
@@ -34,13 +34,22 @@ function collect(connect, monitor) {
 }
 
 function Card(props) {
-  const { isDragging, connectDragSource } = props;
-  const opacity = isDragging ? 0.4: 1
-  return connectDragSource(
-    <button style={Object.assign({}, style, { opacity })}>
-      {props.value}
-    </button>
-  );
+  if (props.hidden) {
+    const opacity = 0
+    return (
+      <button style={Object.assign({}, style, { opacity })}>
+        {props.value}
+      </button>
+    ) 
+  } else {
+    const { isDragging, connectDragSource } = props;
+    const opacity = isDragging ? 0.4: 1
+    return connectDragSource(
+      <button style={Object.assign({}, style, { opacity })}>
+        {props.value}
+      </button>
+    );
+  }
 }
 
 export default DragSource(ItemTypes.NUMBER, numberSource, (connect, monitor) => ({
