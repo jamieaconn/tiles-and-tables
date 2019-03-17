@@ -1,69 +1,12 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
 import { DragDropContext } from 'react-dnd';
-import { DragSource } from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
 
-import './index.css'
+import './styles.css'
+import Bin from './bin.js'
 
 
-
-const ItemTypes = {
-  NUMBER: 'number'
-};
-
-
-const numberSource = {
-  beginDrag(props) {
-    return {
-      value: props.value
-    }
-  }
-};
-
-
-function collect(connect, monitor) {
-  return {
-    connectDragSource: connect.dragSource(),
-    isDragging: monitor.isDragging()
-  }
-}
-
-function Number(props) {
-  const { isDragging, connectDragSource } = props;
-
-  return connectDragSource(
-    <button className="square">
-      {props.value}
-    </button>
-  );
-}
-
-
-const WrappedNumber = DragSource(ItemTypes.NUMBER, numberSource, (connect, monitor) => ({
-  connectDragSource: connect.dragSource(),
-  isDragging: monitor.isDragging(),
-}))(Number)
-
-class Bin extends React.Component {
-  constructor(props) {
-    super(props);
-  }
-
-  renderNumber() {
-    return (
-      <WrappedNumber value={this.props.value}/>
-    )
-  }
-
-  render() {
-    return (
-      <div className="square">
-        {this.renderNumber(this.props.value)}
-      </div>
-    );
-  }
-}
 
 class Board extends React.Component {
   constructor(props) {
@@ -77,8 +20,28 @@ class Board extends React.Component {
     return (
       <Bin 
         value={this.state.items[i]}
+        onDrop={this.handleDrop.bind(this)}
       />
     );
+  }
+
+  handleDrop(x, y) {
+    if (x + y == 5) {
+      console.log(this.state.items)
+      let new_items = []
+      for (let i=0; i < this.state.items.length; i++) {
+        let number = this.state.items[i]
+        if ((number != x) && (number != y)) {
+          new_items.push(number)
+        }
+      }
+      console.log(new_items)
+      this.setState({
+        items: new_items,
+      });
+    } else {
+      console.log("False")
+    }
   }
 
   create_board() {

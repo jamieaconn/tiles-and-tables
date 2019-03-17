@@ -1,5 +1,8 @@
 import React from 'react'
-import Number from './number.js'
+import { DropTarget } from 'react-dnd'
+import ItemTypes from './ItemTypes'
+
+import Card from './card'
 
 const style = {
   border: '1px dashed gray',
@@ -11,22 +14,42 @@ const style = {
   float: 'left',
 }
 
+const numberTarget = {
+  drop(props) {
+    return { 
+      value: props.value,
+    }
+  },
+}
+
 class Bin extends React.Component {
-  renderNumber() {
+  renderCard() {
     return (
-      <Number value={this.props.value}/>
+      <Card value={this.props.value} onDrop={this.props.onDrop}/>
     )
   }
 
   render() {
-    return (
-      <div style={style}>
-        {this.renderNumber(this.props.value)}
+    const { canDrop, isOver, connectDropTarget } = this.props
+    const isActive = canDrop && isOver
+    let backgroundColor = '#222'
+    if (isActive) {
+      backgroundColor = 'darkgreen'
+    } else if (canDrop) {
+      backgroundColor = 'darkkhaki'
+    }
+    return connectDropTarget(
+      <div style={Object.assign({}, style, { backgroundColor })}>
+        {this.renderCard(this.props.value)}
       </div>
     );
   }
 }
 
 
-export default Bin
+export default DropTarget(ItemTypes.NUMBER, numberTarget, (connect, monitor) => ({
+  connectDropTarget: connect.dropTarget(),
+  isOver: monitor.isOver(),
+  canDrop: monitor.canDrop(),
+}))(Bin)
 

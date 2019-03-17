@@ -1,9 +1,6 @@
 import React from 'react'
 import { DragSource } from 'react-dnd'
-
-const ItemTypes = {
-  NUMBER: 'number'
-};
+import ItemTypes from './ItemTypes'
 
 const style = {
   border: '1px dashed gray',
@@ -18,6 +15,14 @@ const numberSource = {
     return {
       value: props.value
     }
+  },
+
+  endDrag(props, monitor) {
+    const item = monitor.getItem()
+    const dropResult = monitor.getDropResult()
+    if (dropResult) {
+      props.onDrop(dropResult.value, props.value)
+    }
   }
 };
 
@@ -28,7 +33,7 @@ function collect(connect, monitor) {
   }
 }
 
-function Number(props) {
+function Card(props) {
   const { isDragging, connectDragSource } = props;
   const opacity = isDragging ? 0.4: 1
   return connectDragSource(
@@ -41,4 +46,4 @@ function Number(props) {
 export default DragSource(ItemTypes.NUMBER, numberSource, (connect, monitor) => ({
   connectDragSource: connect.dragSource(),
   isDragging: monitor.isDragging(),
-}))(Number)
+}))(Card)
