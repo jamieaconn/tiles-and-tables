@@ -4,11 +4,8 @@ import ItemTypes from './ItemTypes'
 import flow from 'lodash/flow'
 
 const style = {
-  border: '1px dashed gray',
-  backgroundColor: 'white',
   padding: '0.5rem',
   cursor: 'move',
-  float: 'left',
 }
 
 const numberSource = {
@@ -49,7 +46,7 @@ function Card(props) {
   if (props.hidden) {
     const opacity = 0
     return (
-      <button style={Object.assign({}, style, { opacity })}>
+      <button className="btn btn-primary" style={Object.assign({}, style, { opacity })}>
         {props.value}
       </button>
     ) 
@@ -57,7 +54,7 @@ function Card(props) {
     const { isDragging, connectDragSource, canDrop, isOver, connectDropTarget } = props;
     const opacity = isDragging ? 0.4: 1
     return connectDragSource(connectDropTarget(
-      <button style={Object.assign({}, style, { opacity })}>
+      <button className="btn btn-primary" style={Object.assign({}, style, { opacity })}>
         {props.value}
       </button>
     ));
