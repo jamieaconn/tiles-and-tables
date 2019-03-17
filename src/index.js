@@ -6,7 +6,7 @@ import HTML5Backend from 'react-dnd-html5-backend';
 import update from 'immutability-helper';
 
 import './styles.css'
-import Bin from './bin.js'
+import Card from './card.js'
 
 
 
@@ -24,9 +24,9 @@ class Board extends React.Component {
     };
   }
 
-  renderBin(i) {
+  renderCard(i) {
     return (
-      <Bin 
+      <Card 
         value={this.state.cards[i].value}
         index={i}
         hidden={this.state.cards[i].hidden}
@@ -35,11 +35,11 @@ class Board extends React.Component {
     );
   }
 
-  handleDrop(bin_index, card_index) {
-    if (this.state.cards[bin_index].value + this.state.cards[card_index].value === this.state.answer) {
+  handleDrop(drop_index, card_index) {
+    if (this.state.cards[drop_index].value + this.state.cards[card_index].value === this.state.answer) {
       let newState = update(this.state, {
         cards: {
-          [bin_index]: {
+          [drop_index]: {
             hidden: {$set: true}
           },
           [card_index]: {
@@ -59,7 +59,7 @@ class Board extends React.Component {
     for (let i=0; i<this.state.cards.length; i++) {
       board.push(
         <div>
-          {this.renderBin(i)}
+          {this.renderCard(i)}
         </div>
       )
     }
