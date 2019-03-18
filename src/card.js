@@ -4,8 +4,9 @@ import ItemTypes from './ItemTypes'
 import flow from 'lodash/flow'
 
 const style = {
-  padding: '0.5rem',
   cursor: 'move',
+  margin: '10px',
+  width: '60px'
 }
 
 const numberSource = {
@@ -16,7 +17,6 @@ const numberSource = {
   },
 
   endDrag(props, monitor) {
-    const item = monitor.getItem()
     const dropResult = monitor.getDropResult()
     if (dropResult) {
       props.onDrop(dropResult.index, props.index)
@@ -35,26 +35,20 @@ const numberTarget = {
   },
 }
 
-function collect(connect, monitor) {
-  return {
-    connectDragSource: connect.dragSource(),
-    isDragging: monitor.isDragging()
-  }
-}
-
 function Card(props) {
   if (props.hidden) {
     const opacity = 0
     return (
-      <button className="btn btn-primary" style={Object.assign({}, style, { opacity })}>
+      <button className="btn btn-primary btn-lg" style={Object.assign({}, style, { opacity })}>
         {props.value}
       </button>
     ) 
   } else {
-    const { isDragging, connectDragSource, canDrop, isOver, connectDropTarget } = props;
+    const { isDragging, connectDragSource, isOver, connectDropTarget } = props;
+    const className = isOver ? "btn btn-primary btn-lg active" : "btn btn-primary btn-lg"
     const opacity = isDragging ? 0.4: 1
     return connectDragSource(connectDropTarget(
-      <button className="btn btn-primary" style={Object.assign({}, style, { opacity })}>
+      <button className={className} style={Object.assign({}, style, { opacity })}>
         {props.value}
       </button>
     ));
