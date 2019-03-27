@@ -1,13 +1,11 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
 import React from 'react'
 import ReactDOM from 'react-dom'
-import { DragDropContext } from 'react-dnd';
-import HTML5Backend from 'react-dnd-html5-backend';
-import update from 'immutability-helper';
+import { fromJS, List } from "immutable";
 
 import './styles.css'
 import Card from './card.js'
-
+import Bin from './bin.js'
 import games from './games.js'
 
 
@@ -17,105 +15,85 @@ class Board extends React.Component {
     let game_index = 0
     let cards = []
     let values = games[game_index].values
-    this.shuffleArray(values);
     for (let i=0; i < values.length; i++) {
-      cards.push({value: values[i], hidden: false})
+      cards.push({value: values[i], state: 'normal'})
     }
-    this.state = {
+    let data = fromJS({
       cards: cards,
-      operation: games[game_index].operation,
+      question_type: games[game_index].question_type,
       answer: games[game_index].answer,
       complete: false,
       game_index: game_index,
-    };
-  }
-
-  shuffleArray(array) {
-    for (let i = array.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [array[i], array[j]] = [array[j], array[i]];
+      question_text: games[game_index].question_text,
+      chosen_cards: [],
+    })
+    this.state = {
+      data: data
     }
   }
 
-  renderCard(i) {
-    return (
-      <Card 
-        key={i}
-        value={this.state.cards[i].value}
-        index={i}
-        hidden={this.state.cards[i].hidden}
-        onDrop={this.handleDrop.bind(this)}
-      />
-    );
-  }
-
-  checkCorrect(drop_index, card_index) {
-    let drop_value = this.state.cards[drop_index].value
-    let card_value = this.state.cards[card_index].value
-    let answer = this.state.answer 
-    let operation = this.state.operation
-    if (operation === "add") {
-      if (drop_value + card_value === answer) {
-        return true
-      } else {
-        return false
-      }
-    } else if (operation === "multiply") {
-      if (drop_value * card_value === answer) {
-        return true
-      } else {
-        return false
-      }
+ 
+  handleClick(card_index) {
+    let num_chosen_cards = this.state.data.get('chosen_cards').count()
+    let newStateData = this.state.data.update("chosen_cards", (list) => list.push(card_index))
+    console.log(newStateData)
+    newStateData = newStateData.updateIn(["cards", card_index], 
+      (card) => card
+        .set('state', 'chosen')
+    )
+    if (num_chosen_cards + 1 === 2) {
+      this.setState({data: newStateData}, () => this.checkIfCorrect())
     } else {
-      return false
+      this.setState({data: newStateData})
     }
   }
 
-  handleDrop(drop_index, card_index) {
-    if (drop_index === card_index) {
-      return;
-    } else if (this.checkCorrect(drop_index, card_index)) {
-      let newState = update(this.state, {
-        cards: {
-          [drop_index]: {
-            hidden: {$set: true}
-          },
-          [card_index]: {
-            hidden: {$set: true}
-          }
-        }
-      })
-      this.setState(newState)
-      this.checkIfComplete()
+  checkIfCorrect() {
+    let chosen_card_indexes = this.state.data.get('chosen_cards').toJS()
+    console.log(chosen_card_indexes)
+    let first_chosen_value = this.state.data.getIn(['cards', chosen_card_indexes[0], 'value'])
+    console.log(first_chosen_value)
+    let second_chosen_value = this.state.data.getIn(['cards', chosen_card_indexes[1], 'value'])
+    console.log(second_chosen_value)
+    let newStateData = this.state.data
+    if (first_chosen_value * 7 === second_chosen_value) {
+      console.log("correct")
+      newStateData = newStateData.updateIn(["cards", chosen_card_indexes[0]],
+        (card) => card
+          .set('state', 'hidden')
+      )
+      newStateData = newStateData.updateIn(["cards", chosen_card_indexes[1]], 
+        (card) => card
+          .set('state', 'hidden')
+      )
     } else {
-      return;
+      newStateData = newStateData.updateIn(["cards", chosen_card_indexes[0]],
+        (card) => card
+          .set('state', 'normal')
+      )
+      newStateData = newStateData.updateIn(["cards", chosen_card_indexes[1]], 
+        (card) => card
+          .set('state', 'normal')
+      )
+      console.log('incorrect')
     }
+    newStateData = newStateData.update('chosen_cards', list => list.clear())
+    this.setState({data: newStateData}, () => this.checkIfComplete())
   }
 
   checkIfComplete() {
-    for (var i=0; i < this.state.cards.length; i++){
-      if (this.state.cards[i].hidden === false) {
-        return;
+    console.log(this.state.data.get('cards').toJS())
+    let num_cards = this.state.data.get('cards').count()
+    for (var i=0; i<num_cards; i++) {
+      if (this.state.data.getIn(['cards', i, 'state']) === "normal") {
+        console.log('not complete')
+        return
       }
     }
-    let newState = update(this.state, {
-      complete: {$set: true},
-    })
-    this.setState(newState)
+    let newStateData = this.state.data.update("complete", value => true)
+    this.state = newStateData
+    console.log('complete')
   }
-
-  create_board() {
-    let board = []
-    for (let i=0; i<this.state.cards.length; i++) {
-      board.push(
-        <div className="col-4">
-          {this.renderCard(i)}
-        </div>
-      )
-    }
-    return board
-  }
-
   restartGame() {
     let cards = []
     let values = games[this.state.game_index].values
@@ -123,23 +101,78 @@ class Board extends React.Component {
     for (let i=0; i < values.length; i++) {
       cards.push({value: values[i], hidden: false})
     }
-    let newState = {
+    let newStateData = {
       cards: cards,
       operation: games[this.state.game_index].operation,
       answer: games[this.state.game_index].answer,
       complete: false,
       game_index: this.state.game_index,
     };
-    this.setState(newState)
+    this.setState({data: newStateData})
         
   }
 
+  renderCard(i) {
+    return (
+      <Card 
+        key={i}
+        value={this.state.data.getIn(['cards', i, 'value'])}
+        index={i}
+        state={this.state.data.getIn(['cards', i, 'state'])}
+        onClick={this.handleClick.bind(this)}
+      />
+    );
+  }
+  renderCards() {
+    let cards = []
+    for (let i=0; i<this.state.data.get('cards').size; i++) {
+      cards.push(
+        <div className="col-4" style={{padding: '20px 0px'}}>
+          {this.renderCard(i)}
+        </div>
+      )
+    }
+    return cards
+  }
+
+  renderBin(value) {
+    return (
+      <Bin
+        value={value}
+      />
+    );
+  }
+  renderBins() {
+    let chosen_card_indexes = this.state.data.get('chosen_cards').toJS()
+    let first_chosen_value = "  ";
+    let second_chosen_value = "  ";
+    if (chosen_card_indexes.length === 1) {
+      first_chosen_value = this.state.data.getIn(['cards', chosen_card_indexes[0], 'value']);
+    }
+    if (chosen_card_indexes.length === 2) {
+      second_chosen_value = this.state.data.getIn(['cards', chosen_card_indexes[1], 'value']);
+    }
+    
+    return (
+      <div className="row">
+        <div className="col-4">
+          {this.renderBin(first_chosen_value)}
+        </div>
+        <div className="col-4">
+          <h4 style={{padding: '20px 0px'}}>times 7 is</h4>
+        </div>
+        <div className="col-4">
+          {this.renderBin(second_chosen_value)}
+        </div>
+      </div>
+    )
+  }
+
   render() {
-    let style = {padding: "50px"}
-    if (this.state.complete) {
+    if (this.state.data.get('complete')) {
       return (
         <div>
-          <div style={style}>
+          <div>
             Nice one!
           </div>
           <button onClick={this.restartGame.bind(this)}>
@@ -150,9 +183,12 @@ class Board extends React.Component {
     }
     return (
       <div>
-        <h3 style={style}>Choose two cards that {this.state.operation} to make {this.state.answer}</h3>
         <div className="row">
-          {this.create_board()}
+          <h3>{this.state.data.get('question_text')} </h3>
+        </div>
+        {this.renderBins()}
+        <div className="row">
+          {this.renderCards()}
         </div>
       </div>
     );
@@ -163,7 +199,7 @@ class Game extends React.Component {
   render() {
     return (
       <div className="game">
-        <div className="gaAme-board" className="container">
+        <div className="game-board" className="container" style={{padding: "20px"}}>
           <Board />
         </div>
       </div>
@@ -172,13 +208,10 @@ class Game extends React.Component {
 }
 
 
-const GameWrapper = DragDropContext(HTML5Backend)(Game)
-
-
 // ========================================
 
 ReactDOM.render(
-  <GameWrapper />,
+  <Game />,
   document.getElementById('root')
 );
 
