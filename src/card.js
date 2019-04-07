@@ -2,7 +2,7 @@ import React from 'react'
 
 const style = {
   height: '100%',
-  width: '50%'
+  width: '70%'
 }
 
 

@@ -1,7 +1,7 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
 import React from 'react'
 import ReactDOM from 'react-dom'
-import { fromJS, List } from "immutable";
+import { fromJS } from "immutable";
 
 import './styles.css'
 import Card from './card.js'
@@ -12,18 +12,21 @@ import games from './games.js'
 class Board extends React.Component {
   constructor(props) {
     super(props);
-    let game_index = 0
+    let game_index = 2
     let cards = []
     let values = games[game_index].values
     for (let i=0; i < values.length; i++) {
       cards.push({value: values[i], state: 'normal'})
     }
+    let shuffled_cards = this.shuffle(cards)
     let data = fromJS({
-      cards: cards,
+      cards: shuffled_cards,
       question_type: games[game_index].question_type,
       answer: games[game_index].answer,
       complete: false,
       game_index: game_index,
+      operation: games[game_index].operation,
+      instruction: games[game_index].instruction,
       question_text: games[game_index].question_text,
       chosen_cards: [],
     })
@@ -32,7 +35,15 @@ class Board extends React.Component {
     }
   }
 
- 
+  shuffle(a) {
+    for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  } 
+
+
   handleClick(card_index) {
     let num_chosen_cards = this.state.data.get('chosen_cards').count()
     let newStateData = this.state.data.update("chosen_cards", (list) => list.push(card_index))
@@ -42,13 +53,20 @@ class Board extends React.Component {
         .set('state', 'chosen')
     )
     if (num_chosen_cards + 1 === 2) {
-      this.setState({data: newStateData}, () => this.checkIfCorrect())
+      this.setState(
+        {data: newStateData}, () => 
+          setTimeout(
+            () => {
+              this.handleAnswer()
+            }, 500
+          )
+        )
     } else {
       this.setState({data: newStateData})
     }
   }
 
-  checkIfCorrect() {
+  handleAnswer() {
     let chosen_card_indexes = this.state.data.get('chosen_cards').toJS()
     console.log(chosen_card_indexes)
     let first_chosen_value = this.state.data.getIn(['cards', chosen_card_indexes[0], 'value'])
@@ -56,7 +74,7 @@ class Board extends React.Component {
     let second_chosen_value = this.state.data.getIn(['cards', chosen_card_indexes[1], 'value'])
     console.log(second_chosen_value)
     let newStateData = this.state.data
-    if (first_chosen_value * 7 === second_chosen_value) {
+    if (this.checkIfCorrect(first_chosen_value, second_chosen_value)) {
       console.log("correct")
       newStateData = newStateData.updateIn(["cards", chosen_card_indexes[0]],
         (card) => card
@@ -81,8 +99,60 @@ class Board extends React.Component {
     this.setState({data: newStateData}, () => this.checkIfComplete())
   }
 
+  checkIfCorrect(first_chosen_value, second_chosen_value) {
+    let operation = this.state.data.get('operation')
+    let question_type = this.state.data.get('question_type')
+    let answer = this.state.data.get('answer')
+
+    if (question_type === "_*n=_") {
+      if (operation === "multiply") {
+        if (first_chosen_value * answer === second_chosen_value) {
+          return true
+        } else {
+          return false
+        }
+      } else if (operation === "add") {
+        if (first_chosen_value + answer === second_chosen_value) {
+          return true
+        } else {
+          return false
+        }
+      }
+    } else if (question_type === "n*_=_") {
+      if (operation === "multiply") {
+        if (answer * first_chosen_value === second_chosen_value) {
+          return true
+        } else {
+          return false
+        }
+      } else if (operation === "add") {
+        if (answer + first_chosen_value === second_chosen_value) {
+          return true
+        } else {
+          return false
+        }
+      }
+
+    } else if (question_type === "_*_=n") {
+      if (operation === "multiply") {
+        if (first_chosen_value * second_chosen_value === answer) {
+          return true
+        } else {
+          return false
+        }
+      } else if (operation === "add") {
+        if (first_chosen_value + second_chosen_value === answer) {
+          return true
+        } else {
+          return false
+        }
+      }
+   
+    }
+  }
+
+
   checkIfComplete() {
-    console.log(this.state.data.get('cards').toJS())
     let num_cards = this.state.data.get('cards').count()
     for (var i=0; i<num_cards; i++) {
       if (this.state.data.getIn(['cards', i, 'state']) === "normal") {
@@ -91,25 +161,33 @@ class Board extends React.Component {
       }
     }
     let newStateData = this.state.data.update("complete", value => true)
-    this.state = newStateData
+    this.setState({data: newStateData})
     console.log('complete')
   }
+
   restartGame() {
+    let game_index = (this.state.data.get('game_index') + 1) % games.length
     let cards = []
-    let values = games[this.state.game_index].values
-    this.shuffleArray(values);
+    let values = games[game_index].values
     for (let i=0; i < values.length; i++) {
-      cards.push({value: values[i], hidden: false})
+      cards.push({value: values[i], state: 'normal'})
     }
-    let newStateData = {
-      cards: cards,
-      operation: games[this.state.game_index].operation,
-      answer: games[this.state.game_index].answer,
+
+    let shuffled_cards = this.shuffle(cards)
+
+    let newStateData = fromJS({
+      cards: shuffled_cards,
+      question_type: games[game_index].question_type,
+      answer: games[game_index].answer,
       complete: false,
-      game_index: this.state.game_index,
-    };
+      game_index: game_index,
+      operation: games[game_index].operation,
+      instruction: games[game_index].instruction,
+      question_text: games[game_index].question_text,
+      chosen_cards: [],
+    })
+    console.log(newStateData)
     this.setState({data: newStateData})
-        
   }
 
   renderCard(i) {
@@ -127,7 +205,7 @@ class Board extends React.Component {
     let cards = []
     for (let i=0; i<this.state.data.get('cards').size; i++) {
       cards.push(
-        <div className="col-4" style={{padding: '20px 0px'}}>
+        <div className="col-3" style={{padding: '20px 0px'}}>
           {this.renderCard(i)}
         </div>
       )
@@ -144,28 +222,65 @@ class Board extends React.Component {
   }
   renderBins() {
     let chosen_card_indexes = this.state.data.get('chosen_cards').toJS()
-    let first_chosen_value = "  ";
-    let second_chosen_value = "  ";
+    let first_chosen_value = "";
+    let second_chosen_value = "";
     if (chosen_card_indexes.length === 1) {
       first_chosen_value = this.state.data.getIn(['cards', chosen_card_indexes[0], 'value']);
     }
     if (chosen_card_indexes.length === 2) {
       second_chosen_value = this.state.data.getIn(['cards', chosen_card_indexes[1], 'value']);
     }
-    
-    return (
-      <div className="row">
-        <div className="col-4">
-          {this.renderBin(first_chosen_value)}
+    let question_type = this.state.data.get('question_type')
+    let question_text = this.state.data.get('question_text').toJS()
+    if (question_type === "_*n=_") {
+      return (
+        <div className="row">
+          <div className="col-3">
+            {this.renderBin(first_chosen_value)}
+          </div>
+          <div className="col-6">
+            <h4 style={{padding: '20px 0px'}}>{question_text[0]}</h4>
+          </div>
+          <div className="col-3">
+            {this.renderBin(second_chosen_value)}
+          </div>
         </div>
-        <div className="col-4">
-          <h4 style={{padding: '20px 0px'}}>times 7 is</h4>
+      )
+    } else if (question_type === "n*_=_") {
+      return (
+        <div className="row">
+          <div className="col-3">
+            <h4 style={{padding: '20px 0px'}}>{question_text[0]}</h4>
+          </div>
+          <div className="col-3">
+            {this.renderBin(first_chosen_value)}
+          </div>
+          <div className="col-3">
+            <h4 style={{padding: '20px 0px'}}>{question_text[1]}</h4>
+          </div>
+          <div className="col-3">
+            {this.renderBin(second_chosen_value)}
+          </div>
         </div>
-        <div className="col-4">
-          {this.renderBin(second_chosen_value)}
+      )
+    } else if (question_type === "_*_=n") {
+      return (
+        <div className="row">
+          <div className="col-3">
+            {this.renderBin(first_chosen_value)}
+          </div>
+          <div className="col-3">
+            <h4 style={{padding: '20px 0px'}}>{question_text[0]}</h4>
+          </div>
+          <div className="col-3">
+            {this.renderBin(second_chosen_value)}
+          </div>
+          <div className="col-3">
+            <h4 style={{padding: '20px 0px'}}>{question_text[1]}</h4>
+          </div>
         </div>
-      </div>
-    )
+      )
+    }
   }
 
   render() {
@@ -173,9 +288,9 @@ class Board extends React.Component {
       return (
         <div>
           <div>
-            Nice one!
+            <h3>Nice one!</h3>
           </div>
-          <button onClick={this.restartGame.bind(this)}>
+          <button className="btn btn-primary btn-lg" onClick={this.restartGame.bind(this)}>
             Play again
           </button>
         </div>
@@ -184,7 +299,7 @@ class Board extends React.Component {
     return (
       <div>
         <div className="row">
-          <h3>{this.state.data.get('question_text')} </h3>
+          <h3>{this.state.data.get('instruction')} </h3>
         </div>
         {this.renderBins()}
         <div className="row">
@@ -199,7 +314,7 @@ class Game extends React.Component {
   render() {
     return (
       <div className="game">
-        <div className="game-board" className="container" style={{padding: "20px"}}>
+        <div className="container" style={{padding: "20px"}}>
           <Board />
         </div>
       </div>
