@@ -6,17 +6,18 @@ export default [
     answer: 7,
     operation: 'multiply',
     instruction: "Choose two cards that make the sentence correct",
-    question_text: ["times 7 is"]
-    
+    question_text: ["times 7 is"],
+    distractors: [],
   },
   { 
-    name: "13 times table",
+    name: "13 tables w distractor",
     question_type: "n*_=_",
-    values: [2, 26, 3, 39, 4, 52, 5, 65, 6, 78, 7, 91],
+    values: [2, 26, 3, 39, 4, 52, 6, 78, 7, 91],
     answer: 13,
     operation: 'multiply',
     instruction: "Choose two cards that make the sentence correct",
-    question_text: ["13 x", "is"]
+    question_text: ["13 x", "is"],
+    distractors: [75, 5],
   },
   {
     name: "Number bonds to 10",
@@ -25,7 +26,8 @@ export default [
     answer: 10,
     operation: 'add',
     instruction: "Choose two cards that add to 10",
-    question_text: ["add", "is 10"]
+    question_text: ["add", "is 10"],
+    distractors: [],
   },
   {
     name: "Negative number bonds",
@@ -34,7 +36,8 @@ export default [
     answer: 5,
     operation: 'add',
     instruction: "Choose two cards that add to make 5",
-    question_text: ["add", "is 5"]
+    question_text: ["add", "is 5"],
+    distractors: [],
   },
   {
     name: "Multiplying negatives",
@@ -43,6 +46,7 @@ export default [
     answer: -12,
     operation: 'multiply',
     instruction: "Choose two numbers that multiply to give -12",
-    question_text: ["times", "is -12"]
+    question_text: ["times", "is -12"],
+    distractors: [],
   },
 ]

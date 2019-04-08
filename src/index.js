@@ -21,6 +21,11 @@ class Board extends React.Component {
     for (let i=0; i < values.length; i++) {
       cards.push({value: values[i], state: 'normal'})
     }
+    let distractors = games[game_index].distractors
+    for (let i=0; i < distractors.length; i++) {
+      cards.push({value: distractors[i], state: 'normal'})
+    }
+
     let shuffled_cards = this.shuffle(cards)
     let data = fromJS({
       cards: shuffled_cards,
@@ -159,12 +164,17 @@ class Board extends React.Component {
 
 
   checkIfComplete() {
+    let num_values = games[this.state.data.get('game_index')].values.length
     let num_cards = this.state.data.get('cards').count()
+    let num_hidden_cards = 0
     for (var i=0; i<num_cards; i++) {
-      if (this.state.data.getIn(['cards', i, 'state']) === "normal") {
-        console.log('not complete')
-        return
+      if (this.state.data.getIn(['cards', i, 'state']) === "hidden") {
+        num_hidden_cards += 1
       }
+    }
+    if (num_hidden_cards != num_values) {
+      console.log('not complete')
+      return
     }
     let newStateData = this.state.data.update("complete", value => true)
     this.setState({data: newStateData})
@@ -176,6 +186,10 @@ class Board extends React.Component {
     let values = games[game_index].values
     for (let i=0; i < values.length; i++) {
       cards.push({value: values[i], state: 'normal'})
+    }
+    let distractors = games[game_index].distractors
+    for (let i=0; i < distractors.length; i++) {
+      cards.push({value: distractors[i], state: 'normal'})
     }
 
     let shuffled_cards = this.shuffle(cards)
@@ -307,7 +321,7 @@ class Board extends React.Component {
 
   render() {
     if (this.state.data.get('complete')) {
-      let game_index = (this.state.data.get('game_index') + 1) % games.length
+      let game_index = this.state.data.get('game_index')
       return (
         <div>
           <div>
