@@ -1,4 +1,7 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
+import 'jquery/dist/jquery.min.js'
+import 'bootstrap/dist/js/bootstrap.min.js'
+
 import React from 'react'
 import ReactDOM from 'react-dom'
 import { fromJS } from "immutable";
@@ -168,8 +171,7 @@ class Board extends React.Component {
     console.log('complete')
   }
 
-  restartGame() {
-    let game_index = (this.state.data.get('game_index') + 1) % games.length
+  restartGame(game_index) {
     let cards = []
     let values = games[game_index].values
     for (let i=0; i < values.length; i++) {
@@ -286,14 +288,39 @@ class Board extends React.Component {
     }
   }
 
+
+  renderGameOptions() {
+    let options = []
+    for (var i=0; i<games.length; i++) {
+      options.push(
+       <li><a className="dropdown-item" onClick={this.restartGame.bind(this, i)} >{games[i].name}</a></li>
+      )
+    }
+    return options
+  }
+
+  renderGameDropdown() {
+    return (
+      <div className="dropdown col-1 offset-5">
+        <button className="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          Switch game
+        </button>
+        <ul className="dropdown-menu" id="dropdown">
+          {this.renderGameOptions()}
+        </ul>
+      </div>
+    );
+  }
+
   render() {
     if (this.state.data.get('complete')) {
+      let game_index = this.state.data.get('game_index')
       return (
         <div>
           <div>
             <h3>Nice one!</h3>
           </div>
-          <button className="btn btn-primary btn-lg" onClick={this.restartGame.bind(this)}>
+          <button className="btn btn-primary btn-lg" onClick={this.restartGame.bind(this, game_index)}>
             Play again
           </button>
         </div>
@@ -301,6 +328,9 @@ class Board extends React.Component {
     }
     return (
       <div>
+        <div className="row">
+          {this.renderGameDropdown()}
+        </div>
         <div className="row">
           <h3>{this.state.data.get('instruction')} </h3>
         </div>
