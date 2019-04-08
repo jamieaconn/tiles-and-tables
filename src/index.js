@@ -46,6 +46,9 @@ class Board extends React.Component {
 
   handleClick(card_index) {
     let num_chosen_cards = this.state.data.get('chosen_cards').count()
+    if (num_chosen_cards === 2) {
+      return
+    }
     let newStateData = this.state.data.update("chosen_cards", (list) => list.push(card_index))
     console.log(newStateData)
     newStateData = newStateData.updateIn(["cards", card_index], 
