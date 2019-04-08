@@ -218,18 +218,11 @@ class Board extends React.Component {
     return cards
   }
 
-  renderBin(value) {
-    return (
-      <Bin
-        value={value}
-      />
-    );
-  }
   renderBins() {
     let chosen_card_indexes = this.state.data.get('chosen_cards').toJS()
     let first_chosen_value = "";
     let second_chosen_value = "";
-    if (chosen_card_indexes.length === 1) {
+    if (chosen_card_indexes.length >= 1) {
       first_chosen_value = this.state.data.getIn(['cards', chosen_card_indexes[0], 'value']);
     }
     if (chosen_card_indexes.length === 2) {
@@ -241,13 +234,13 @@ class Board extends React.Component {
       return (
         <div className="row">
           <div className="col-3">
-            {this.renderBin(first_chosen_value)}
+            <Bin value={first_chosen_value}/>
           </div>
           <div className="col-6">
             <h4 style={{padding: '20px 0px'}}>{question_text[0]}</h4>
           </div>
           <div className="col-3">
-            {this.renderBin(second_chosen_value)}
+            <Bin value={second_chosen_value}/>
           </div>
         </div>
       )
@@ -258,13 +251,13 @@ class Board extends React.Component {
             <h4 style={{padding: '20px 0px'}}>{question_text[0]}</h4>
           </div>
           <div className="col-3">
-            {this.renderBin(first_chosen_value)}
+            <Bin value={first_chosen_value}/>
           </div>
           <div className="col-3">
             <h4 style={{padding: '20px 0px'}}>{question_text[1]}</h4>
           </div>
           <div className="col-3">
-            {this.renderBin(second_chosen_value)}
+            <Bin value={second_chosen_value}/>
           </div>
         </div>
       )
@@ -272,13 +265,13 @@ class Board extends React.Component {
       return (
         <div className="row">
           <div className="col-3">
-            {this.renderBin(first_chosen_value)}
+            <Bin value={first_chosen_value}/>
           </div>
           <div className="col-3">
             <h4 style={{padding: '20px 0px'}}>{question_text[0]}</h4>
           </div>
           <div className="col-3">
-            {this.renderBin(second_chosen_value)}
+            <Bin value={second_chosen_value}/>
           </div>
           <div className="col-3">
             <h4 style={{padding: '20px 0px'}}>{question_text[1]}</h4>
@@ -314,7 +307,7 @@ class Board extends React.Component {
 
   render() {
     if (this.state.data.get('complete')) {
-      let game_index = this.state.data.get('game_index')
+      let game_index = (this.state.data.get('game_index') + 1) % games.length
       return (
         <div>
           <div>
