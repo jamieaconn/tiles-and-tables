@@ -1,15 +1,15 @@
 {
-  "main.css": "/static/css/main.18ea173b.chunk.css",
-  "main.js": "/static/js/main.f4d1237d.chunk.js",
-  "main.js.map": "/static/js/main.f4d1237d.chunk.js.map",
-  "runtime~main.js": "/static/js/runtime~main.a8a9905a.js",
-  "runtime~main.js.map": "/static/js/runtime~main.a8a9905a.js.map",
-  "static/css/2.7b2fb5bf.chunk.css": "/static/css/2.7b2fb5bf.chunk.css",
-  "static/js/2.08945968.chunk.js": "/static/js/2.08945968.chunk.js",
-  "static/js/2.08945968.chunk.js.map": "/static/js/2.08945968.chunk.js.map",
-  "index.html": "/index.html",
-  "precache-manifest.da3bc598c5ad9b88080185d2c05b7040.js": "/precache-manifest.da3bc598c5ad9b88080185d2c05b7040.js",
-  "service-worker.js": "/service-worker.js",
-  "static/css/2.7b2fb5bf.chunk.css.map": "/static/css/2.7b2fb5bf.chunk.css.map",
-  "static/css/main.18ea173b.chunk.css.map": "/static/css/main.18ea173b.chunk.css.map"
+  "main.css": "/tiles-and-tables/static/css/main.18ea173b.chunk.css",
+  "main.js": "/tiles-and-tables/static/js/main.f4d1237d.chunk.js",
+  "main.js.map": "/tiles-and-tables/static/js/main.f4d1237d.chunk.js.map",
+  "runtime~main.js": "/tiles-and-tables/static/js/runtime~main.279ed9c3.js",
+  "runtime~main.js.map": "/tiles-and-tables/static/js/runtime~main.279ed9c3.js.map",
+  "static/css/2.7b2fb5bf.chunk.css": "/tiles-and-tables/static/css/2.7b2fb5bf.chunk.css",
+  "static/js/2.08945968.chunk.js": "/tiles-and-tables/static/js/2.08945968.chunk.js",
+  "static/js/2.08945968.chunk.js.map": "/tiles-and-tables/static/js/2.08945968.chunk.js.map",
+  "index.html": "/tiles-and-tables/index.html",
+  "precache-manifest.bd9ffbc23351c73e383d6b5d732c8b00.js": "/tiles-and-tables/precache-manifest.bd9ffbc23351c73e383d6b5d732c8b00.js",
+  "service-worker.js": "/tiles-and-tables/service-worker.js",
+  "static/css/2.7b2fb5bf.chunk.css.map": "/tiles-and-tables/static/css/2.7b2fb5bf.chunk.css.map",
+  "static/css/main.18ea173b.chunk.css.map": "/tiles-and-tables/static/css/main.18ea173b.chunk.css.map"
 }
